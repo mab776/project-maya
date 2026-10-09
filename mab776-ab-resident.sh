@@ -16,10 +16,10 @@ c['env'] = {'STRATA_GLM_SPLIT': '40', 'STRATA_GLM_SLOT_DIR': '/slots', 'STRATA_G
 c['env'].update(dict(a.split('=', 1) for a in sys.argv[1:]))
 json.dump(c, open(p, 'w'), indent=1)
 PY
-  docker stop -t 30 maya-glm >/dev/null 2>&1; mv -f maya-trial.log "maya-trial-$L-prev.log" 2>/dev/null
+  docker stop -t 30 maya-trial >/dev/null 2>&1; mv -f maya-trial.log "maya-trial-$L-prev.log" 2>/dev/null
   MAYA_GPUS=0,1 ./mab776-run.sh >/dev/null || { log "start failed"; return; }
-  for i in $(seq 1 90); do sleep 5; docker logs maya-glm 2>&1 | grep -q "^ready" && break
-    docker ps --format '{{.Names}}' | grep -qx maya-glm || { log "died at start"; tail -4 maya-trial.log >> "$OUT"; return; }; done
+  for i in $(seq 1 90); do sleep 5; docker logs maya-trial 2>&1 | grep -q "^ready" && break
+    docker ps --format '{{.Names}}' | grep -qx maya-trial || { log "died at start"; tail -4 maya-trial.log >> "$OUT"; return; }; done
   grep -E "RAM tier|expert pool|resident|refus" maya-trial.log | cut -c1-150 >> "$OUT"
   log "RAM avail $(free -g | awk '/^Mem/{print $7}') GB"
   for d in 30000 127000; do
