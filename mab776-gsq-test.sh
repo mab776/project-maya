@@ -11,5 +11,5 @@ arm S-gpu0-tokfix Maya-S-v2-IQ2_XXS 0
 arm G-gpu0    GSQ-RCO-3.5bit 0
 arm G-split40 GSQ-RCO-3.5bit 0,1 STRATA_GLM_SPLIT=40
 arm G-split40-mtpM GSQ-RCO-3.5bit 0,1 STRATA_GLM_SPLIT=40 STRATA_GLM_MTP_GGUF=/models/Maya-M/GLM-5.3-Flash-Maya-M-00003-of-00003.gguf
-docker stop -t 30 maya-glm >/dev/null 2>&1
+docker stop -t 30 maya-trial >/dev/null 2>&1
 log ""; log "##### done $(date +%H:%M) — GPUs left to GLM (Strata stays off, Marc 10-08)"
