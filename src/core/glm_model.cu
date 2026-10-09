@@ -305,6 +305,15 @@ bool Glm5Geometry::from_gguf(const strata::GgufFile& g, Glm5Geometry& out, std::
     out.idx_key = (int) num("attention.indexer.key_length", out.idx_key, ok);
     out.idx_top_k = (int) num("attention.indexer.top_k", out.idx_top_k, ok);
     out.idx_kpool = (int) num("attention.indexer.kpool", out.idx_kpool, ok);
+    // mab776: STRATA_GLM_TOPK=<n> overrides the DSA indexer's top_k (positions each token attends to; the model's
+    // 2048 = 512 pools of 4) - an experiment on low-bit quants losing exact digits past ~30k context
+    if (const char* tk = getenv("STRATA_GLM_TOPK")) {
+        const int v = std::atoi(tk);
+        if (v >= out.idx_kpool && v % out.idx_kpool == 0) {
+            std::fprintf(stderr, "glm: indexer top_k %d -> %d (STRATA_GLM_TOPK)\n", out.idx_top_k, v);
+            out.idx_top_k = v;
+        }
+    }
     out.idx_select_tail = (int) num("attention.indexer.kpool_select_tail", out.idx_select_tail, ok);
     out.hc = (int) num("hyper_connection.count", out.hc, ok);
     out.sinkhorn_iters = (int) num("hyper_connection.sinkhorn_iterations", out.sinkhorn_iters, ok);
