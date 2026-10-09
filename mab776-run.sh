@@ -1,5 +1,5 @@
 #!/bin/sh
-# mab776 trial launcher (v1.0.16 worktree; venv + vision borrowed from ../project-maya): Project Maya (GLM-5.3-Flash, Maya-S) on GPUs 0+1 = the best config (split 40, see README; MAYA_GPUS=0 for one GPU), http://192.168.0.70:8325
+# mab776 trial launcher (v1.0.23 worktree; venv + vision borrowed from ../project-maya): Project Maya (GLM-5.3-Flash, Maya-S) on GPUs 0+1 = split auto since v1.0.21 (see README; MAYA_GPUS=0 for one GPU), http://192.168.0.70:8325
 # ⚠️ ONLY with strata-coder STOPPED: the engine pins all free RAM but ~6 GB for its expert tier.
 # Stop: docker stop maya-glm (the container is --rm).  Log: maya-trial.log
 cd "$(dirname "$0")" || exit 1
