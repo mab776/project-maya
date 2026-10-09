@@ -3362,6 +3362,10 @@ def main() -> int:
         venv = dict(env)
         if vcfg and vcfg.get("gpu") and gpu_list(cfg) and cfg.get("backend") != "hip":
             venv["CUDA_VISIBLE_DEVICES"] = str(gpu_list(cfg)[0])   # the encoder on the first GPU only
+            # mab776: "device": <n> puts the encoder on another GPU of the split (with "resident": true, e.g. the small
+            # card - the big one then never lends its expert pool to a picture)
+            if vcfg.get("device") is not None:
+                venv["CUDA_VISIBLE_DEVICES"] = str(vcfg["device"])
         # the GLM engine lends the encoder the tail of its expert cache while it encodes, sized by what the encoder
         # measured on this GPU ("resident": true keeps the encoder running beside the model, holding its VRAM)
         on_demand = bool(vcfg) and vcfg.get("gpu") and not vcfg.get("resident")
