@@ -1,0 +1,40 @@
+{
+ "exe": "/maya/build/strata",
+ "args": [
+  "--glm-pack",
+  "/models/Maya-S-v2-IQ2_XXS/pack",
+  "--max-context",
+  "262144"
+ ],
+ "cwd": "/maya",
+ "tokenizer": "/models/Maya-S-v2-IQ2_XXS/pack/tokenizer",
+ "model_name": "glm-5.3-flash",
+ "gpu": [
+  0,
+  1
+ ],
+ "sampling": {
+  "temperature": 1.0,
+  "top_p": 0.95
+ },
+ "reasoning_effort": "medium",
+ "lib_dirs": [],
+ "port": 8325,
+ "host": "0.0.0.0",
+ "vision": {
+  "exe": "/maya/build-vision/bin/strata-vision",
+  "mmproj": "/models/vision/mmproj-GLM-5.3-Flash-F16.gguf",
+  "model": "/models/vision/GLM-5.3-Flash-vocab.gguf",
+  "gpu": true,
+  "resident": false,
+  "max_tokens": 4096
+ },
+ "log": "/maya/maya-glm.log",
+ "env": {
+  "STRATA_GLM_SLOT_DIR": "/slots",
+  "STRATA_GLM_USAGE": "/slots/usage-maya-s.txt",
+  "STRATA_GLM_SLOT_KEEP": "1",
+  "STRATA_GLM_KV_INT8": "1",
+  "STRATA_GLM_CPU_SHARED": "1"
+ }
+}
