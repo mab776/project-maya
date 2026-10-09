@@ -627,7 +627,7 @@ bool Glm5Model::prefill_setup(std::string& err) {
     // the pool to come: `per` slots a layer over the tier layers, as fast_setup sizes it from the same free VRAM
     size_t dev_free = 0, dev_total = 0;
     cudaMemGetInfo(&dev_free, &dev_total);
-    const size_t avail = pool_avail(dev_free, dev_total);
+    const size_t avail = pool_avail(dev_free, dev_total, dev_);
     size_t blob_sum = 0, stride_sum = 0;
     for (int il = l0_; il < lt_; ++il) {
         const auto& Ly = F->L[(size_t) il];
