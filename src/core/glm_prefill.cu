@@ -525,6 +525,10 @@ bool Glm5Model::prefill_setup(std::string& err) {
     if (n_parts_ > 2) T = 512;
     if (const char* b = getenv("STRATA_GLM_PREFILL_MB")) budget_mb = std::atof(b);
     if (const char* c = getenv("STRATA_GLM_PREFILL_CHUNK")) T = std::max(16, std::atoi(c));
+    // mab776: per-GPU overrides (STRATA_GLM_PREFILL_MB_<dev> / _CHUNK_<dev>) - in a split, the big card can take the
+    // one-GPU budget (8 GB, 32K chunks) while the small one keeps its own
+    if (const char* b = getenv(("STRATA_GLM_PREFILL_MB_" + std::to_string(dev_)).c_str())) budget_mb = std::atof(b);
+    if (const char* c = getenv(("STRATA_GLM_PREFILL_CHUNK_" + std::to_string(dev_)).c_str())) T = std::max(16, std::atoi(c));
     while (T > 64) {
         const auto pu = bytes_for((size_t) T);
         if ((double) (fixed + pu.first + pu.second) <= budget_mb * 1048576.0) break;
@@ -948,25 +952,32 @@ void Glm5Model::prefill_return() {
     S->lent = false;
 }
 
+// mab776: the prefill profile (STRATA_GLM_PREFILL_PROF) printed per prompt as well as at shutdown - the server
+// kills the engine on SIGTERM, so the shutdown print never shows; the phase times reset after each print
+template <class PS> static void prefill_prof_dump(PS* S, int dev_) {   // PS = Glm5Model::PrefillState (private: deduced, never named)
+    if (S->prof && !S->pacc.empty()) {
+    double tot = 0;
+    for (auto& kv : S->pacc) tot += kv.second;
+    std::fprintf(stderr, "glm prefill prof CUDA%d (%lld tokens, %.0f ms of stream time; waits on disk %.0f ms, plan %.0f "
+                         "ms host; disk experts used %llu, read %llu):\n", dev_, (long long) S->tokens, tot, S->ms_disk,
+                 S->ms_plan, (unsigned long long) S->staged_disk, (unsigned long long) S->disk_issued);
+    std::vector<std::pair<double, std::string>> v;
+    for (auto& kv : S->pacc) v.push_back({kv.second, kv.first});
+    std::sort(v.rbegin(), v.rend());
+    for (auto& e : v)
+        std::fprintf(stderr, "  %-14s %9.1f ms  %5.1f%%  (%.3f ms/token)\n", e.second.c_str(), e.first,
+                     100.0 * e.first / std::max(1e-9, tot), e.first / (double) std::max<int64_t>(1, S->tokens));
+}
+    S->pacc.clear();
+}
+
 void Glm5Model::prefill_destroy() {
     PrefillState* S = pf_;
     if (S == nullptr) return;
     cudaSetDevice(dev_);
     if (fast_ && fast_->cs) cudaStreamSynchronize(fast_->cs);
     if (fast_ && fast_->copy) cudaStreamSynchronize(fast_->copy);
-    if (S->prof && !S->pacc.empty()) {
-        double tot = 0;
-        for (auto& kv : S->pacc) tot += kv.second;
-        std::fprintf(stderr, "glm prefill prof CUDA%d (%lld tokens, %.0f ms of stream time; waits on disk %.0f ms, plan %.0f "
-                             "ms host; disk experts used %llu, read %llu):\n", dev_, (long long) S->tokens, tot, S->ms_disk,
-                     S->ms_plan, (unsigned long long) S->staged_disk, (unsigned long long) S->disk_issued);
-        std::vector<std::pair<double, std::string>> v;
-        for (auto& kv : S->pacc) v.push_back({kv.second, kv.first});
-        std::sort(v.rbegin(), v.rend());
-        for (auto& e : v)
-            std::fprintf(stderr, "  %-14s %9.1f ms  %5.1f%%  (%.3f ms/token)\n", e.second.c_str(), e.first,
-                         100.0 * e.first / std::max(1e-9, tot), e.first / (double) std::max<int64_t>(1, S->tokens));
-    }
+    prefill_prof_dump(S, dev_);
     for (auto e : S->pev) cudaEventDestroy(e);
     for (auto& t : S->tr)
         for (cudaEvent_t e : {t.start, t.plan, t.pre, t.c1, t.end})
@@ -2544,6 +2555,9 @@ bool Glm5Model::prefill_run(const std::vector<int32_t>& tokens, std::string& err
     const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
     pf_->ms += ms;
     for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get()) m->pf_->tokens += n;
+    for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get())   // mab776: per-prompt profile
+        if (m->pf_->prof) { cudaSetDevice(m->dev_); cudaDeviceSynchronize(); prefill_prof_dump(m->pf_, m->dev_); }
+    cudaSetDevice(dev_);
     static const bool verbose = getenv("STRATA_GLM_PREFILL_VERBOSE") != nullptr;
     if (verbose) {
         uint64_t sr = 0, sv = 0, sd = 0, rr = 0, rs = 0, ce = 0, cr = 0, pi = 0, ph = 0, pr = 0;
