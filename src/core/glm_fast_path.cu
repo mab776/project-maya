@@ -828,6 +828,9 @@ bool Glm5Model::fast_setup(std::string& err) {
         // keep ~700 MB for the driver, the sampler and kernel launches' local memory
         size_t reserve = (size_t) (F->unified_memory ? 1024 : 700) << 20;
         if (const char* r = getenv("STRATA_GLM_RESERVE_MB")) reserve = (size_t) std::atoll(r) << 20;
+        // mab776: per-GPU reserve, e.g. room on the small card for a resident vision encoder's image buffers
+        if (const char* r = getenv(("STRATA_GLM_RESERVE_MB_" + std::to_string(dev_)).c_str()))
+            reserve = (size_t) std::atoll(r) << 20;
         size_t avail = glmfast::expert_pool_budget(false, free_b, 0, reserve, 0, 0);
 #if defined(STRATA_USE_HIP)
         if (F->unified_memory) {
