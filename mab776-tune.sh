@@ -13,13 +13,13 @@ c['gpu'] = [int(x) for x in os.environ.get('MAYA_GPUS', '0').split(',')]
 if not c['env']: c.pop('env')
 json.dump(c, open('maya-trial.json', 'w'), indent=1)
 EOF
-docker stop -t 30 maya-glm >/dev/null 2>&1
+docker stop -t 30 maya-trial >/dev/null 2>&1
 mv -f maya-trial.log "maya-trial-$LABEL-prev.log" 2>/dev/null
 ./mab776-run.sh >/dev/null || exit 1
 for i in $(seq 1 60); do
   sleep 5
-  docker logs maya-glm 2>&1 | grep -q "^ready" && break
-  docker ps --format '{{.Names}}' | grep -qx maya-glm || { echo "maya-glm died at start"; exit 1; }
+  docker logs maya-trial 2>&1 | grep -q "^ready" && break
+  docker ps --format '{{.Names}}' | grep -qx maya-trial || { echo "maya-trial died at start"; exit 1; }
 done
 grep -E "RAM tier|expert pool|prefill: CUDA. chunks|glm split|glm mtp" maya-trial.log | cut -c1-160
 echo "RAM available after load: $(free -g | awk '/^Mem/{print $7}') GB"
