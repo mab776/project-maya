@@ -19,7 +19,7 @@ docker run --rm --name maya-build --memory 10g --memory-swap 10g --cpus 6 \
       -DCMAKE_CUDA_ARCHITECTURES=120 -DSTRATA_NATIVE_EXPERTS=ON -DSTRATA_BUILD_TESTS=OFF \
       -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DSTRATA_GGML_DIR=/maya/third_party/llama.cpp
     nice -n 19 cmake --build build --target strata -j 3
-    exit 0  # mab776-116: vision unchanged, reuse ../project-maya build-vision
+    exit 0  # mab776: vision unchanged since v1.0.16,, reuse ../project-maya build-vision
     python3 tools/vision/glm5next_patch.py third_party/llama.cpp
     cmake -G Ninja -S tools/vision -B build-vision -DCMAKE_BUILD_TYPE=Release \
       -DLLAMA_DIR=/maya/third_party/llama.cpp -DSTRATA_VISION_CUDA=ON \
