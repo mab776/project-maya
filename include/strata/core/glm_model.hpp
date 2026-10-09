@@ -441,7 +441,7 @@ public:
     void prefill_cap(int T, const char* why);              // its pinned staging for chunks of at most T
     void prefill_settle(double pinned_share);              // --prefill auto's lend cap from the pinned share (85/90%)
     std::pair<size_t, size_t> prefill_bytes_for(size_t T) const;   // a chunk's device buffers {kept rows, scratch}
-    static size_t pool_avail(size_t free_b, size_t total_b);   // the expert pool's bytes from the free VRAM
+    static size_t pool_avail(size_t free_b, size_t total_b, int dev = -1);   // the expert pool's bytes from the free VRAM
     bool lend_tail(size_t limit, uint64_t& moved, uint64_t& dropped, std::string& err);
     bool vis_lend_ok_ = false;                             // this half's tail can go to the vision encoder
     bool vis_lent_ = false;                                // ... and is with it now (freed)

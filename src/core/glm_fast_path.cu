@@ -3655,9 +3655,14 @@ int Glm5Model::fast_sample(strata::kernels::SamplerParams& sp, std::string& err)
 // counts everything this process already holds on the device, so the pool gets what such a card would have).  The
 // prompt path and the layer split search size from the same number, before the pool is carved (a discrete card's:
 // fast_setup prices a unified-memory APU's pool itself).
-size_t Glm5Model::pool_avail(size_t free_b, size_t total_b) {
+size_t Glm5Model::pool_avail(size_t free_b, size_t total_b, int dev) {
     size_t reserve = (size_t) 700 << 20;
     if (const char* r = getenv("STRATA_GLM_RESERVE_MB")) reserve = (size_t) std::atoll(r) << 20;
+    // mab776: the per-GPU reserve fast_setup keeps (STRATA_GLM_RESERVE_MB_<dev>), so the split search and the prompt
+    // chunk size see the same pool
+    if (dev >= 0)
+        if (const char* r = getenv(("STRATA_GLM_RESERVE_MB_" + std::to_string(dev)).c_str()))
+            reserve = (size_t) std::atoll(r) << 20;
     size_t avail = glmfast::expert_pool_budget(false, free_b, 0, reserve, 0, 0);
     if (const char* cap = getenv("STRATA_GLM_POOL_GB"))
         avail = std::min(avail, (size_t) (std::atof(cap) * 1073741824.0));
