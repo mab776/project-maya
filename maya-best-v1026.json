@@ -33,9 +33,8 @@
  "env": {
   "STRATA_GLM_SLOT_DIR": "/slots",
   "STRATA_GLM_USAGE": "/slots/usage-maya-s.txt",
-  "STRATA_GLM_CPU_LANE0": "16",
-  "STRATA_GLM_CPU_LANE1": "4",
   "STRATA_GLM_SLOT_KEEP": "1",
-  "STRATA_GLM_KV_INT8": "1"
+  "STRATA_GLM_KV_INT8": "1",
+  "STRATA_GLM_CPU_SHARED": "1"
  }
 }
