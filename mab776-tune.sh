@@ -1,6 +1,6 @@
 #!/bin/sh
 # mab776: one tuning arm = restart Maya (GPU 0) with engine env KEY=VAL ... then strata_bench at 27k + 125k.
-#   [MAYA_GPUS=0,1] ./mab776-tune.sh LABEL [KEY=VAL ...]      results appended to tune-results.jsonl
+#   [MAYA_GPUS=0,1] [MAYA_ARGS='--flag val'] ./mab776-tune.sh LABEL [KEY=VAL ...]      results appended to tune-results.jsonl
 # The env goes into maya-trial.json "env" (the server passes it to the engine); the last arm's env stays there.
 cd "$(dirname "$0")" || exit 1
 LABEL=$1; shift
@@ -10,6 +10,7 @@ c = json.load(open('maya-trial.json'))
 import os
 c['env'] = dict(a.split('=', 1) for a in sys.argv[1:])
 c['gpu'] = [int(x) for x in os.environ.get('MAYA_GPUS', '0').split(',')]
+c['args'] = ['--glm-pack', '/models/Maya-S-v2-IQ2_XXS/pack', '--max-context', '262144'] + os.environ.get('MAYA_ARGS', '').split()
 if not c['env']: c.pop('env')
 json.dump(c, open('maya-trial.json', 'w'), indent=1)
 EOF
