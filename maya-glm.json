@@ -6,7 +6,9 @@
   "--max-context",
   "262144",
   "--expert-profile",
-  "/maya/data/expert-profile-glm.bin"
+  "/maya/data/expert-profile-glm.bin",
+  "--kv-streaming",
+  "on"
  ],
  "cwd": "/maya",
  "tokenizer": "/models/Maya-S-v2-IQ2_XXS/pack/tokenizer",
