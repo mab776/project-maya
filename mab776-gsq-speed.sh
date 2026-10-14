@@ -8,7 +8,7 @@ ENV=$(python3 -c "import json;e=json.load(open('maya-glm.json'))['env'];e['STRAT
 arm() {  # LABEL ENV...
   L=$1; shift; echo "=== $L"; rm -f "$T"/slot-*
   MAYA_PACK=GSQ-RCO-3.5bit MAYA_GPUS=0,1 MAYA_ARGS="$ARGS" ./mab776-tune.sh "$L" $ENV "$@" || return
-  grep -E "glm mtp|RAM tier|expert pool" maya-trial.log | cut -c1-170
+  grep -E "glm-pack|GSQ" maya-trial.json | head -2; grep -E "glm mtp|RAM tier|expert pool" maya-trial.log | cut -c1-170
   python3 mab776-dflash-sweep.py http://127.0.0.1:8325 "$L-warm" base | tail -1
   python3 mab776-dflash-sweep.py http://127.0.0.1:8325 "$L" base | tail -1
 }
