@@ -4,15 +4,15 @@
 # The env goes into maya-trial.json "env" (the server passes it to the engine); the last arm's env stays there.
 cd "$(dirname "$0")" || exit 1
 LABEL=$1; shift
-python3 - "$@" <<'EOF'
+python3 - "$@" <<'EOF' || exit 1
 import json, sys
 c = json.load(open('maya-trial.json'))
 import os
 c['env'] = dict(a.split('=', 1) for a in sys.argv[1:])
 c['gpu'] = [int(x) for x in os.environ.get('MAYA_GPUS', '0').split(',')]
 pk = os.environ.get('MAYA_PACK', 'Maya-S-v2-IQ2_XXS')
-c['args'] = ['--glm-pack', f'/models/{pk}/pack', '--max-context', '262144']
-c['tokenizer'] = f'/models/{pk}/pack/tokenizer' + os.environ.get('MAYA_ARGS', '').split()
+c['args'] = ['--glm-pack', f'/models/{pk}/pack', '--max-context', '262144'] + os.environ.get('MAYA_ARGS', '').split()
+c['tokenizer'] = f'/models/{pk}/pack/tokenizer'
 if not c['env']: c.pop('env')
 json.dump(c, open('maya-trial.json', 'w'), indent=1)
 EOF
