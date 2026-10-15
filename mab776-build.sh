@@ -6,7 +6,7 @@ cd "$(dirname "$0")" || exit 1
 COMMIT=$(sed -n 's/^LLAMA_CPP_COMMIT = "\(.*\)"/\1/p' setup.py)
 docker run --rm --name maya-build --memory 10g --memory-swap 10g --cpus 6 \
   -v "$PWD":/maya -v "$PWD/../project-maya/third_party/llama.cpp":/maya/third_party/llama.cpp:ro -w /maya ${CUDA_IMAGE:-nvidia/cuda:12.8.1-devel-ubuntu24.04} bash -euc "
-    trap 'chown -R $(id -u):$(id -g) /maya/build /maya/build-vision /maya/third_party 2>/dev/null' EXIT
+    trap 'chown -R $(id -u):$(id -g) /maya/build /maya/build-vision /maya/third_party 2>/dev/null || true' EXIT
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -qq && apt-get install -y -qq python3 python3-venv curl unzip g++ git >/dev/null
     python3 -m venv /tmp/v && /tmp/v/bin/pip install -q cmake ninja
