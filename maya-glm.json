@@ -2,7 +2,7 @@
  "exe": "/maya/build/strata",
  "args": [
   "--glm-pack",
-  "/models/Maya-S-v2-IQ2_XXS/pack",
+  "/models/GSQ-RCO-3.5bit/pack",
   "--max-context",
   "262144",
   "--expert-profile",
@@ -11,7 +11,7 @@
   "on"
  ],
  "cwd": "/maya",
- "tokenizer": "/models/Maya-S-v2-IQ2_XXS/pack/tokenizer",
+ "tokenizer": "/models/GSQ-RCO-3.5bit/pack/tokenizer",
  "model_name": "glm-5.3-flash",
  "gpu": [
   0,
@@ -41,6 +41,9 @@
   "STRATA_GLM_CPU_SHARED": "1",
   "STRATA_GLM_SPEC_SAMPLE": "1",
   "STRATA_GLM_SPEC_CANCEL": "1",
-  "STRATA_GLM_CKPTS": "0"
+  "STRATA_GLM_CKPTS": "0",
+  "STRATA_GLM_MTP_GGUF": "/models/mtp-drafts/Maya-M-nextn-blk45.gguf",
+  "STRATA_GLM_RAM_RESIDENT": "1",
+  "STRATA_GLM_PROMOTE_MIN": "6"
  }
 }

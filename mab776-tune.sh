@@ -1,6 +1,6 @@
 #!/bin/sh
 # mab776: one tuning arm = restart Maya (GPU 0) with engine env KEY=VAL ... then strata_bench at 27k + 125k.
-#   [MAYA_GPUS=0,1] [MAYA_ARGS='--flag val'] [MAYA_PACK=<dir under models/maya>] ./mab776-tune.sh LABEL [KEY=VAL ...]      results appended to tune-results.jsonl
+#   [MAYA_GPUS=0,1] [MAYA_ARGS='--flag val'] [MAYA_PACK=<dir under models/maya, default GSQ-RCO-3.5bit>] ./mab776-tune.sh LABEL [KEY=VAL ...]      results appended to tune-results.jsonl
 # The env goes into maya-trial.json "env" (the server passes it to the engine); the last arm's env stays there.
 cd "$(dirname "$0")" || exit 1
 LABEL=$1; shift
@@ -10,7 +10,7 @@ c = json.load(open('maya-trial.json'))
 import os
 c['env'] = dict(a.split('=', 1) for a in sys.argv[1:])
 c['gpu'] = [int(x) for x in os.environ.get('MAYA_GPUS', '0').split(',')]
-pk = os.environ.get('MAYA_PACK', 'Maya-S-v2-IQ2_XXS')
+pk = os.environ.get('MAYA_PACK', 'GSQ-RCO-3.5bit')
 c['args'] = ['--glm-pack', f'/models/{pk}/pack', '--max-context', '262144'] + os.environ.get('MAYA_ARGS', '').split()
 c['tokenizer'] = f'/models/{pk}/pack/tokenizer'
 if not c['env']: c.pop('env')
