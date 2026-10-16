@@ -1,6 +1,6 @@
 #!/bin/sh
 # mab776: one tuning arm = restart Maya (GPU 0) with engine env KEY=VAL ... then strata_bench at 27k + 125k.
-#   [MAYA_GPUS=0,1] [MAYA_ARGS='--flag val'] [MAYA_PACK=<dir under models/maya, default GSQ-RCO-3.5bit>] ./mab776-tune.sh LABEL [KEY=VAL ...]      results appended to tune-results.jsonl
+#   [MAYA_DEPTHS="30000 127000"] [MAYA_GPUS=0,1] [MAYA_ARGS='--flag val'] [MAYA_PACK=<dir under models/maya, default GSQ-RCO-3.5bit>] ./mab776-tune.sh LABEL [KEY=VAL ...]      results appended to tune-results.jsonl
 # The env goes into maya-trial.json "env" (the server passes it to the engine); the last arm's env stays there.
 cd "$(dirname "$0")" || exit 1
 LABEL=$1; shift
@@ -26,7 +26,7 @@ for i in $(seq 1 60); do
 done
 grep -E "RAM tier|expert pool|prefill: CUDA. chunks|glm split|glm mtp" maya-trial.log | cut -c1-160
 echo "RAM available after load: $(free -g | awk '/^Mem/{print $7}') GB"
-for d in 30000 127000; do
+for d in ${MAYA_DEPTHS:-30000 127000}; do
   timeout 900 python3 ../strata-coder/bench/strata_bench.py $d --label "maya-$LABEL" --url http://127.0.0.1:8325 2>&1 | tail -1 | tee -a tune-results.jsonl
 done
 grep -E "glm stat|glm spec" maya-trial.log | tail -3 | sed 's/.*decode/decode/' | cut -c1-200
